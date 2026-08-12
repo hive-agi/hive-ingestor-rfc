@@ -1,0 +1,7 @@
+{:lib io.github.hive-agi/hive-ingestor-rfc
+ :minor 1
+ :license {:name "Proprietary" :url "https://gitea.hive-mcp.com/hive-agi/hive-ingestor-rfc"}
+ :scm-url "https://gitea.hive-mcp.com/hive-agi/hive-ingestor-rfc"
+ :aot/package-protocols [hive-addon.protocol/IAddon]
+ :src-dirs ["src" "resources"]
+ :publish :gitea}

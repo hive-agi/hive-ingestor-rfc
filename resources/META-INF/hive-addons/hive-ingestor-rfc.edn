@@ -1,0 +1,10 @@
+{:addon/id           "hive.ingestor.rfc"
+ :addon/kind         :addon
+ :addon/type         :native
+ :addon/init-ns      "hive-ingestor-rfc.addon"
+ :addon/init-fn      "addon-ctor"
+ :addon/config       {}
+ :addon/capabilities #{:sources}
+ :addon/dependencies #{"hive.ingestor"}
+ :addon/description  "RFC-series corpus for hive-ingestor: local rsync-mirror ISource registered through the host's source registry"
+ :addon/license      "Proprietary"}
