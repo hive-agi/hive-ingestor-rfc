@@ -3,4 +3,5 @@
  :description "RFC-series corpus provider for hive-ingestor: local rsync-mirror source, registered as an IAddon."
  :license "Proprietary"
  :language :clojure
- :tags ["addon" "ingestor" "corpus" "rfc"]}
+ :tags ["addon" "ingestor" "corpus" "rfc"] 
+ :carto {:source-roots ["resources" "src" "test"]}}

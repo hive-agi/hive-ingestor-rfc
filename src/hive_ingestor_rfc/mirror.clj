@@ -18,7 +18,9 @@
             [hive-dsl.result :as r]
             [hive-ingestor.source.filesystem :as fs-source]
             [hive-ingestor.source.protocol :refer [ISource ISourceHealth]]
-            [hive-ingestor.source.web-docs :as web-docs]))
+            [hive-ingestor.source.web-docs :as web-docs]
+            [hive-ingestor-rfc.index :as index]
+            [clojure.java.io :as io]))
 
 (def default-glob
   "Mirror files that are RFC documents. The mirror also carries indices,
@@ -69,6 +71,30 @@
                         paths)
                   opts))))
 
+(defn- load-registry
+  "The registry keyed by RFC number, or {} when the mirror has none.
+
+   Read ONCE per run: a 10 MB index parsed per document would cost more than
+   the ingest. An absent or unreadable index degrades to no status facets,
+   never to a failed run — the documents are still worth having."
+  [dir {:keys [index-path use-index?] :or {use-index? true}}]
+  (if-not use-index?
+    {}
+    (let [path (or index-path (str (io/file dir index/index-file-name)))]
+      (if (.isFile (io/file path))
+        (let [parsed (index/parse path)]
+          (if (r/ok? parsed) (:ok parsed) {}))
+        {}))))
+
+(defn- with-registry-facets
+  "DOC carrying the registry's view of it: current status, and what obsoletes
+   or updates it — knowledge the document's own masthead cannot contain."
+  [doc registry]
+  (let [number (some-> (get-in doc [:document/metadata :rfc/number]) str parse-long)]
+    (if-let [record (get registry number)]
+      (update doc :document/metadata index/enrich-metadata record)
+      doc)))
+
 (defrecord RfcMirrorSource [dir]
   ISource
   (source-id [_] "rfc")
@@ -78,22 +104,26 @@
       (if (str/blank? (str dir))
         (r/err :source/invalid-config {:reason "no mirror directory specified"})
         (r/let-ok [entries (mirror-entries dir opts)]
-          (r/ok (into []
-                      (keep (fn [{:keys [path url]}]
-                              (let [body (r/guard Exception nil (slurp path))
-                                    doc  (when body
-                                           (web-docs/body->document
-                                            body
-                                            {:url url :content-type "text/plain"}
-                                            opts))]
-                                (when (and doc (r/ok? doc)) (:ok doc)))))
-                      entries))))))
+          (let [registry (load-registry dir opts)]
+            (r/ok (into []
+                        (keep (fn [{:keys [path url]}]
+                                (let [body (r/guard Exception nil (slurp path))
+                                      doc  (when body
+                                             (web-docs/body->document
+                                              body
+                                              {:url url :content-type "text/plain"}
+                                              opts))]
+                                  (when (and doc (r/ok? doc))
+                                    (with-registry-facets (:ok doc) registry)))))
+                        entries)))))))
 
   ISourceHealth
   (source-health [this]
     (let [entries (mirror-entries dir {})]
       (if (r/ok? entries)
-        {:status :ok :details {:dir dir :documents (count (:ok entries))}}
+        {:status :ok :details {:dir dir
+                               :documents (count (:ok entries))
+                               :registry? (.isFile (io/file (str (io/file dir index/index-file-name))))}}
         {:status :down :details {:dir dir :error (:error entries)}}))))
 
 (defn rfc-mirror-source
