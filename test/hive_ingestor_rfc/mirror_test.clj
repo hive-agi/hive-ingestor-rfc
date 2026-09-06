@@ -5,7 +5,7 @@
    test makes one."
   (:require [clojure.test :refer [deftest is testing]]
             [hive-dsl.result :as r]
-            [hive-ingestor.source.protocol :as sp]
+            [hive-spi.ingest.ports :as sp]
             [hive-ingestor-rfc.mirror :as mirror])
   (:import (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)))

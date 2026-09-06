@@ -1,18 +1,18 @@
 {:paths ["src" "resources"]
 
- ;; The private registry. Declared HERE, not only in a developer's user-level
- ;; deps.edn, so a cold clone and CI resolve hive-agi artifacts identically.
- :mvn/repos {"hive-gitea" {:url "https://gitea.hive-mcp.com/api/packages/hive-agi/maven"}}
-
  :deps
  {org.clojure/clojure           {:mvn/version "1.12.5"}
 
-  ;; hive-ingestor — the host this addon extends: ISource, the source and
-  ;; parser-rule registries, and the document pipeline everything feeds.
-  io.github.hive-agi/hive-ingestor {:mvn/version "0.2.151"}
+  ;; hive-spi — the ingestion seam this addon fills: ISource, the owner-scoped
+  ;; source registry, the Document value object, the conformance kit.
+  io.github.hive-agi/hive-spi   {:mvn/version "1.1.0"}
+
+  ;; hive-ingest-kit — body->document: the same rule chain, RFC parser and
+  ;; document shape the web source uses, so mirror and HTTP ingests agree.
+  io.github.hive-agi/hive-ingest-kit {:mvn/version "0.1.1"}
 
   ;; hive-dsl — Result monad and error taxonomy
-  io.github.hive-agi/hive-dsl   {:mvn/version "0.5.21"}
+  io.github.hive-agi/hive-dsl   {:mvn/version "0.5.22"}
 
   ;; hive-addon — the IAddon protocol this registers through
   io.github.hive-agi/hive-addon {:mvn/version "1.0.0"}

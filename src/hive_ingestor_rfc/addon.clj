@@ -8,7 +8,7 @@
   (:require [hive-addon.protocol :as proto]
             [hive-dsl.result :as r]
             [hive-ingestor-rfc.mirror :as mirror]
-            [hive-ingestor.source.registry :as source-registry]
+            [hive-spi.ingest.registry :as source-registry]
             [taoensso.timbre :as log]))
 
 (def addon-id "hive.ingestor.rfc")

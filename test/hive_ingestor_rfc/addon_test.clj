@@ -4,8 +4,8 @@
             [hive-addon.protocol :as proto]
             [hive-ingestor-rfc.addon :as addon]
             [hive-ingestor-rfc.mirror :as mirror]
-            [hive-ingestor.source.protocol :as sp]
-            [hive-ingestor.source.registry :as registry]))
+            [hive-spi.ingest.ports :as sp]
+            [hive-spi.ingest.registry :as registry]))
 
 (use-fixtures :each (fn [f] (proto/shutdown! (addon/addon-ctor)) (f) (proto/shutdown! (addon/addon-ctor))))
 

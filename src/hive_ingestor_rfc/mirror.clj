@@ -16,11 +16,13 @@
    story: crash, re-run the window, continue."
   (:require [clojure.string :as str]
             [hive-dsl.result :as r]
-            [hive-ingestor.source.filesystem :as fs-source]
-            [hive-ingestor.source.protocol :refer [ISource ISourceHealth]]
-            [hive-ingestor.source.web-docs :as web-docs]
+            [hive-spi.ingest.ports :refer [ISource ISourceHealth]]
+            [hive-ingest-kit.web-docs :as web-docs]
             [hive-ingestor-rfc.index :as index]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io])
+(:import [java.nio.file Files]
+[java.nio.file FileSystems]
+[java.nio.file Path]))
 
 (def default-glob
   "Mirror files that are RFC documents. The mirror also carries indices,
@@ -58,12 +60,29 @@
     limit  (take limit)
     true   vec))
 
+(defn mirror-files
+  "Absolute paths of the regular files under DIR whose DIR-relative path
+   matches GLOB, sorted. Returns Result<vector<string>>; a missing or
+   non-directory DIR is an error, not an empty mirror."
+  [dir glob]
+  (r/try-effect* :source/dir-expansion-failed
+    (let [root (.toAbsolutePath (.toPath (io/file (str dir))))]
+      (when-not (Files/isDirectory root (make-array java.nio.file.LinkOption 0))
+        (throw (ex-info (str "Not a directory: " dir) {:dir dir})))
+      (let [matcher (.getPathMatcher (FileSystems/getDefault) (str "glob:" glob))]
+        (with-open [walk (Files/walk root (make-array java.nio.file.FileVisitOption 0))]
+          (->> (iterator-seq (.iterator walk))
+               (filter #(Files/isRegularFile ^Path % (make-array java.nio.file.LinkOption 0)))
+               (filter #(.matches matcher (.relativize root ^Path %)))
+               (mapv str)
+               sort
+               vec))))))
+
 (defn mirror-entries
   "Every RFC document in the mirror at DIR as {:path :rfc/number :url}.
    Returns Result<vector>."
   [dir {:keys [glob] :as opts}]
-  (r/let-ok [paths (fs-source/expand-paths dir {:glob (or glob default-glob)
-                                                :recursive? true})]
+  (r/let-ok [paths (mirror-files dir (or glob default-glob))]
     (r/ok (window (into []
                         (keep (fn [path]
                                 (when-let [n (rfc-number path)]

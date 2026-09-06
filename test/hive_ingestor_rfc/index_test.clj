@@ -4,8 +4,7 @@
             [hive-dsl.result :as r]
             [hive-ingestor-rfc.index :as index]
             [hive-ingestor-rfc.mirror :as mirror]
-            [hive-ingestor.source.protocol :as sp]
-            [hive-ingestor.storage.provenance :as prov])
+            [hive-spi.ingest.ports :as sp])
   (:import (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)))
 
@@ -77,8 +76,8 @@
     (testing "the document carries the registry's view"
       (is (= "HISTORIC" (:rfc/status md)))
       (is (= [2965] (:rfc/obsoleted-by md))))
-    (testing "and it reaches the facets the host emits on document AND chunks"
-      (let [facets (prov/document-facets md)]
+    (testing "and it reaches :facets, the generic seam a host emits on document AND chunks"
+      (let [facets (:facets md)]
         (is (some #{"status:historic"} facets))
         (is (some #{"obsoleted-by:2965"} facets))))))
 
@@ -88,6 +87,6 @@
         md   (:document/metadata (first (:ok docs)))]
     (testing "no status is invented"
       (is (nil? (:rfc/status md)))
-      (is (not-any? #(re-find #"^status:" %) (prov/document-facets md))))
+      (is (not-any? #(re-find #"^status:" %) (:facets md))))
     (testing "but the document is still there"
       (is (= 1 (count (:ok docs)))))))
