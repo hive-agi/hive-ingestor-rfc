@@ -7,4 +7,6 @@
  :addon/capabilities #{:sources}
  :addon/dependencies #{"hive.ingestor"}
  :addon/description  "RFC-series corpus for hive-ingestor: local rsync-mirror ISource registered through the host's source registry"
- :addon/license      "Proprietary"}
+ :addon/license      "Proprietary"
+ :addon/maturity :experimental
+ :addon/trust-class :proprietary}
