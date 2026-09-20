@@ -5,17 +5,17 @@
 
   ;; hive-spi — the ingestion seam this addon fills: ISource, the owner-scoped
   ;; source registry, the Document value object, the conformance kit.
-  io.github.hive-agi/hive-spi   {:mvn/version "1.2.0"}
+  io.github.hive-agi/hive-spi   {:mvn/version "1.3.0"}
 
   ;; hive-ingest-kit — body->document: the same rule chain, RFC parser and
   ;; document shape the web source uses, so mirror and HTTP ingests agree.
-  io.github.hive-agi/hive-ingest-kit {:mvn/version "0.1.6"}
+  io.github.hive-agi/hive-ingest-kit {:mvn/version "0.1.7"}
 
   ;; hive-dsl — Result monad and error taxonomy
-  io.github.hive-agi/hive-dsl   {:mvn/version "0.5.30"}
+  io.github.hive-agi/hive-dsl   {:mvn/version "0.5.31"}
 
   ;; hive-addon — the IAddon protocol this registers through
-  io.github.hive-agi/hive-addon {:mvn/version "1.0.13"}
+  io.github.hive-agi/hive-addon {:mvn/version "1.0.14"}
 
   ;; Logging
   com.taoensso/timbre           {:mvn/version "6.8.0"}}
@@ -24,15 +24,15 @@
  {:test
   {:extra-paths ["test"]
    :extra-deps {lambdaisland/kaocha           {:mvn/version "1.91.1392"}
-                io.github.hive-agi/hive-test  {:mvn/version "0.4.8"}
+                io.github.hive-agi/hive-test  {:mvn/version "0.4.9"}
                 org.clojure/test.check        {:mvn/version "1.1.3"}}
    :main-opts ["-m" "kaocha.runner"]}
 
   :dev
   {:extra-paths ["dev" "test"]
-   :extra-deps {io.github.hive-agi/hive-test {:mvn/version "0.4.8"}
+   :extra-deps {io.github.hive-agi/hive-test {:mvn/version "0.4.9"}
                 org.clojure/test.check       {:mvn/version "1.1.3"}}}
 
   :build
-  {:deps {io.github.hive-agi/hive-build {:mvn/version "0.1.21"}}
+  {:deps {io.github.hive-agi/hive-build {:mvn/version "0.1.22"}}
    :ns-default hive-build.api}}}
