@@ -1,0 +1,38 @@
+Network Working Group                                          A. Author
+Request for Comments: 9999                                  Example Corp
+Obsoletes: 9998                                                B. Second
+Category: Standards Track                                   January 2020
+
+
+                    Example Protocol for Testing
+
+Status of this Memo
+
+   This document specifies a test protocol.
+
+Abstract
+
+   This protocol does nothing at all.
+   It exists only for tests.
+
+Table of Contents
+
+   1. Introduction ................................................1
+   2. Details ....................................................2
+
+1. Introduction
+
+   The protocol is introduced here, referencing RFC 2616 for context.
+
+2. Details
+
+Author, et al.              Standards Track                     [Page 1]
+RFC 9999                  Example Protocol              January 2020
+
+2.1. Syntax
+
+       Indented syntax block.
+
+2.2. Semantics
+
+   Semantics text, see RFC 2616 and RFC 1945.

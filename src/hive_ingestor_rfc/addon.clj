@@ -4,12 +4,17 @@
    The host owns the seams; this addon owns the corpus. On initialize! it
    registers its ISource factory in the host's source registry, so the series
    becomes reachable as `ingest source source=rfc dir=...` without the host
-   ever naming an RFC. shutdown! retracts every registration it owns."
+   ever naming an RFC. It also registers the RFC parse rule (claiming a
+   text/plain RFC before the generic plaintext rule) and, when the host is
+   loaded, the :content/spec chunker. shutdown! retracts every registration
+   it owns."
   (:require [hive-addon.protocol :as proto]
             [hive-dsl.result :as r]
             [hive-ingestor-rfc.mirror :as mirror]
             [hive-spi.ingest.registry :as source-registry]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [hive-ingestor-rfc.parser :as parser]
+            [hive-ingestor-rfc.chunker :as chunker]))
 
 (def addon-id "hive.ingestor.rfc")
 
@@ -17,6 +22,10 @@
   "The id the corpus is driven by, and — via the host's corpus scoping — the
    scope it lands in (topic:rfc)."
   "rfc")
+
+(def content-kind
+  "The content kind RFC documents carry; its chunking is owned here."
+  :content/spec)
 
 (def source-registration
   {:factory     (fn [{:keys [dir]}] (mirror/rfc-mirror-source dir))
@@ -32,14 +41,32 @@
 
 (defonce ^:private addon-state (atom nil))
 
+(defn- host-content-kind-fn
+  "The host's content-kind seam fn named SYM, or nil when the host is absent.
+   Resolved at runtime so the addon carries no compile-time host dependency."
+  [sym]
+  (try (some-> (requiring-resolve (symbol "hive-ingestor.content-kind" (name sym))) var-get)
+       (catch Exception _ nil)))
+
 (defn register!
-  "Register this addon's corpus with the host. Returns Result."
+  "Register this addon's corpus, parse rule and spec chunker with the host.
+   Returns Result. The content-kind seam is optional: without the host loaded
+   only the source and the parse rule are registered."
   []
-  (source-registry/register-source! addon-id source-id source-registration))
+  (r/let-ok [_ (source-registry/register-source! addon-id source-id source-registration)
+             _ (source-registry/register-parser-rule! addon-id parser/rule-id
+                                                      {:rule (parser/rfc-text-rule)
+                                                       :priority 10})
+             _ (if-let [register (host-content-kind-fn 'register-content-kind!)]
+                 (register addon-id content-kind {:chunk-fn chunker/chunk-spec})
+                 (r/ok :no-host))]
+    (r/ok {:source source-id :rule parser/rule-id :content-kind content-kind})))
 
 (defn retract!
   "Remove every registration this addon owns. Returns Result."
   []
+  (when-let [unregister (host-content-kind-fn 'unregister-content-kind!)]
+    (unregister addon-id content-kind))
   (source-registry/retract-all! addon-id))
 
 (defrecord RfcCorpusAddon [id])
