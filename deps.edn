@@ -11,6 +11,9 @@
   ;; document shape the web source uses, so mirror and HTTP ingests agree.
   io.github.hive-agi/hive-ingest-kit {:mvn/version "0.1.10"}
 
+  ;; hive-html — the IWebsiteParser port the RFC text parser implements.
+  io.github.hive-agi/hive-html  {:mvn/version "0.1.9"}
+
   ;; hive-dsl — Result monad and error taxonomy
   io.github.hive-agi/hive-dsl   {:mvn/version "0.5.36"}
 
