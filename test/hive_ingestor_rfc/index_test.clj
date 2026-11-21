@@ -1,12 +1,19 @@
 (ns hive-ingestor-rfc.index-test
   "The registry: what a document cannot know about itself."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
+            [hive-addon.protocol :as proto]
             [hive-dsl.result :as r]
+            [hive-ingestor-rfc.addon :as addon]
             [hive-ingestor-rfc.index :as index]
             [hive-ingestor-rfc.mirror :as mirror]
             [hive-spi.ingest.ports :as sp])
   (:import (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)))
+
+;; Ingesting through the mirror needs the addon's RFC parse rule registered.
+(use-fixtures :each (fn [f]
+                      (proto/initialize! (addon/addon-ctor) {})
+                      (try (f) (finally (proto/shutdown! (addon/addon-ctor))))))
 
 (def ^:private index-xml
   (str "<rfc-index>"
