@@ -3,12 +3,21 @@
 
    Nothing here touches rsync or the network: a mirror is a directory, so the
    test makes one."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
+            [hive-addon.protocol :as proto]
             [hive-dsl.result :as r]
             [hive-spi.ingest.ports :as sp]
+            [hive-ingestor-rfc.addon :as addon]
             [hive-ingestor-rfc.mirror :as mirror])
   (:import (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)))
+
+;; The RFC parse rule is the addon's, registered on initialize!: the kit's
+;; shared chain no longer carries one, so a mirror read parses as a spec only
+;; while the addon is loaded, as it always is in production.
+(use-fixtures :each (fn [f]
+                      (proto/initialize! (addon/addon-ctor) {})
+                      (try (f) (finally (proto/shutdown! (addon/addon-ctor))))))
 
 (def ^:private rfc-2109
   (str "Network Working Group                                     D. Kristol\n"
