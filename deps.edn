@@ -12,7 +12,7 @@
   io.github.hive-agi/hive-ingest-kit {:mvn/version "0.2.2"}
 
   ;; hive-html — the IWebsiteParser port the RFC text parser implements.
-  io.github.hive-agi/hive-html  {:mvn/version "0.1.9"}
+  io.github.hive-agi/hive-html  {:mvn/version "0.2.1"}
 
   ;; hive-dsl — Result monad and error taxonomy
   io.github.hive-agi/hive-dsl   {:mvn/version "0.6.2"}
